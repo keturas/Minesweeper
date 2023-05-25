@@ -57,7 +57,7 @@ void generateBomb(int x, int y) {
 	}
 }
 
-void fieldEvent(RenderWindow& window) {
+void gridEvent(RenderWindow& window) {
 	Event event;
 
 	while (window.pollEvent(event)) {
@@ -82,9 +82,9 @@ void fieldEvent(RenderWindow& window) {
 					openTile(x, y);
 
 					if (grid[x][y].mine == true) {
-						RenderWindow Megumin(VideoMode(1000, 1000), "Megumin!");
+						RenderWindow Megumin(VideoMode(1644, 2089), "Megumin!");
 						Texture texture;
-						texture.loadFromFile("images/Tiles.png");
+						texture.loadFromFile("images/BAH.png");
 						Sprite sprite;
 						sprite.setTexture(texture);
 
@@ -114,24 +114,28 @@ void fieldEvent(RenderWindow& window) {
 	}
 }
 
-void fPrintText(std::string text, Font& font, RenderWindow& window, float x_correction, float y_correction) {
-	Text stext(text, font, 20);
-	stext.setPosition(x_correction, y_correction); 
+void gridPrintText(string text, Font& font, RenderWindow& window, float x_correction, float y_correction) {
+	Text stext(text, font, 24);
+	stext.setPosition(x_correction, y_correction);
 	stext.setFillColor(Color::Black);
 	window.draw(stext);
 }
 
-std::string fTime(int seconds) {
-	std::string result;
+string gridTime(int seconds) {
+	string result;
 	int iminutes = seconds / 60;
 	int iseconds = seconds % 60;
-	std::string sminutes = std::to_string(iminutes);
-	std::string sseconds = std::to_string(iseconds);
+	string sminutes = to_string(iminutes);
+	string sseconds = to_string(iseconds);
+
 	if (iminutes < 10)
 		sminutes.insert(sminutes.begin(), '0');
+
 	if (iseconds < 10)
 		sseconds.insert(sseconds.begin(), '0');
+
 	result += sminutes + ":" + sseconds;
+
 	return result;
 }
 
@@ -154,13 +158,15 @@ int main() {
 
 	Clock clock;
 	clock.restart();
-	int temp_seconds = 0;
+	int seconds = 0;
+	int lastFrameCount = 0;
+	int frameCount = 0;
 
 	while (window.isOpen()) {
 		window.clear(Color::White);
 
-		for (size_t i = 0; i < gridWidth; i++) {
-			for (size_t j = 0; j < gridHight; j++) {
+		for (int i = 0; i < gridWidth; i++) {
+			for (int j = 0; j < gridHight; j++) {
 				if (grid[i][j].flag) {
 					sprites[11].setPosition(i * imageWidth, j * imageWidth);
 					window.draw(sprites[11]);
@@ -184,12 +190,21 @@ int main() {
 			}
 		}
 
-		if (temp_seconds != clock.getElapsedTime().asSeconds()) {
-			temp_seconds = static_cast<int>(clock.getElapsedTime().asSeconds());
-			fPrintText("Time: " + fTime(600 - temp_seconds), font, window, 0, 10.f * 32);
+		if (seconds != static_cast<int>(clock.getElapsedTime().asSeconds())) {
+			seconds = static_cast<int>(clock.getElapsedTime().asSeconds());
+			gridPrintText("Time: " + gridTime(seconds), font, window, 0, gridHight * 32.f);
+			if (seconds % 5 == 0) {
+				frameCount -= lastFrameCount;
+				lastFrameCount = frameCount;
+			}
 		}
 
-		fieldEvent(window);
+		frameCount++;
+		
+
+		gridPrintText("Frame: " + to_string(frameCount), font, window, 200, gridHight * 32.f);
+
+		gridEvent(window);
 
 		window.display();
 	}
