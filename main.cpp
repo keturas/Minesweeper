@@ -159,8 +159,6 @@ int main() {
 	Clock clock;
 	clock.restart();
 	int seconds = 0;
-	int lastFrameCount = 0;
-	int frameCount = 0;
 
 	while (window.isOpen()) {
 		window.clear(Color::White);
@@ -190,19 +188,10 @@ int main() {
 			}
 		}
 
-		if (seconds != static_cast<int>(clock.getElapsedTime().asSeconds())) {
+		if (seconds != clock.getElapsedTime().asSeconds()) {
 			seconds = static_cast<int>(clock.getElapsedTime().asSeconds());
 			gridPrintText("Time: " + gridTime(seconds), font, window, 0, gridHight * 32.f);
-			if (seconds % 5 == 0) {
-				frameCount -= lastFrameCount;
-				lastFrameCount = frameCount;
-			}
 		}
-
-		frameCount++;
-		
-
-		gridPrintText("Frame: " + to_string(frameCount), font, window, 200, gridHight * 32.f);
 
 		gridEvent(window);
 
