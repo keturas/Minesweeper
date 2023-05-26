@@ -94,7 +94,24 @@ void openTile(int x, int y) {
 	grid[x][y].tileState = Tile::TileState::open;
 	openedTiles++;
 
-	if (grid[x][y].count != 0)
+	if (grid[x][y].isBomb)
+		bombOpen = true;
+
+	int count = grid[x][y].count;
+
+	for (int dx : {-1, 0, 1}) {
+		for (int dy : {-1, 0, 1}) {
+			int x2 = x + dx, y2 = y + dy;
+
+			if (!areCoordsValid(x2, y2))
+				continue;
+
+			if (grid[x2][y2].tileState == Tile::TileState::flaged)
+				count--;
+		}
+	}
+
+	if (count != 0)
 		return;
 
 	for (int dx : {-1, 0, 1}) {
@@ -104,9 +121,8 @@ void openTile(int x, int y) {
 			if (!areCoordsValid(x2, y2))
 				continue;
 
-			if (grid[x2][y2].tileState == Tile::TileState::closed) {
-				openTile(x2, y2);;
-			}
+			if (grid[x2][y2].tileState == Tile::TileState::closed)
+				openTile(x2, y2);
 		}
 	}
 }
@@ -132,6 +148,12 @@ void generateBomb(int x, int y) {
 			}
 		}
 	}
+
+	if (grid[x][y].count > 0 || grid[x][y].isBomb) {
+		restart();
+		generateBomb(x, y);
+		firstPress = false;
+	}
 }
 
 void gridEvent(sf::RenderWindow& window) {
@@ -146,7 +168,7 @@ void gridEvent(sf::RenderWindow& window) {
 			int x = pos.x / 32;
 			int y = pos.y / 32;
 
-			if (!areCoordsValid(x, y) || grid[x][y].tileState == Tile::TileState::open)
+			if (!areCoordsValid(x, y))
 				return;
 
 			if (firstPress) {
@@ -156,14 +178,11 @@ void gridEvent(sf::RenderWindow& window) {
 				return;
 			}
 
-			if (event.key.code == sf::Mouse::Right)
+			if (event.key.code == sf::Mouse::Right && grid[x][y].tileState != Tile::TileState::open )
 				grid[x][y].toggleFlag() == Tile::TileState::flaged ? flagAmount++ : flagAmount--;
 
-			if (event.key.code == sf::Mouse::Left && grid[x][y].tileState != Tile::TileState::flaged) {
+			if (event.key.code == sf::Mouse::Left && grid[x][y].tileState != Tile::TileState::flaged)
 				openTile(x, y);
-
-				bombOpen = grid[x][y].isBomb;
-			}
 		}
 	}
 }
@@ -217,7 +236,7 @@ void draw(sf::RenderWindow& window) {
 	window.display();
 }
 
-void gameOver() {
+void gameOver(std::chrono::system_clock::time_point lastFrame) {
 	int x, y;
 	std::string path;
 
@@ -268,7 +287,7 @@ int main() {
 	while (window.isOpen()) {
 		draw(window);
 		gridEvent(window);
-		gameOver();
+		gameOver(lastFrame);
 
 		std::this_thread::sleep_until(nextFrame);
 		lastFrame = nextFrame;
