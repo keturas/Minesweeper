@@ -91,11 +91,15 @@ void restart() {
 }
 
 void openTile(int x, int y) {
-	grid[x][y].tileState = Tile::TileState::open;
-	openedTiles++;
+	if (grid[x][y].tileState == Tile::TileState::closed) {
+		grid[x][y].tileState = Tile::TileState::open;
+		openedTiles++;
+	}
 
-	if (grid[x][y].isBomb)
+	if (grid[x][y].isBomb) {
 		bombOpen = true;
+		return;
+	}
 
 	int count = grid[x][y].count;
 
