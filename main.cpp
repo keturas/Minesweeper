@@ -1,3 +1,5 @@
+#include <chrono>
+#include <thread>
 #include <SFML/Graphics.hpp>
 #include <time.h>
 
@@ -14,7 +16,6 @@ bool firstPress = true;
 int bombAmount = gridWidth * gridHight / 5, flagAmount = 0;
 int openedTiles = 0;
 bool bombOpen = false;
-
 
 class Tile {
 public:
@@ -260,9 +261,17 @@ int main() {
 
 	sf::RenderWindow window(sf::VideoMode(gridWidth * imageWidth, gridHight * imageWidth + 32), "Minesweeper!");
 
+	using frames = std::chrono::duration<int64_t, std::ratio<1, 5>>;
+	auto nextFrame = std::chrono::system_clock::now();
+	auto lastFrame = nextFrame - frames{1};
+
 	while (window.isOpen()) {
 		draw(window);
 		gridEvent(window);
 		gameOver();
+
+		std::this_thread::sleep_until(nextFrame);
+		lastFrame = nextFrame;
+		nextFrame += frames{1};
 	}
 }
