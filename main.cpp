@@ -261,7 +261,7 @@ int main() {
 
 	sf::RenderWindow window(sf::VideoMode(gridWidth * imageWidth, gridHight * imageWidth + 32), "Minesweeper!");
 
-	using frames = std::chrono::duration<int64_t, std::ratio<1, 5>>;
+	using frames = std::chrono::duration<int64_t, std::ratio<1, 25>>;
 	auto nextFrame = std::chrono::system_clock::now();
 	auto lastFrame = nextFrame - frames{1};
 
